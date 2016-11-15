@@ -35,11 +35,9 @@ class TSL2561(object):
             self.address = address
         else:
             self.address = TSL2561_ADDR_FLOAT
-            
+
         self.i2c = open('/dev/i2c-%s' % busnum, 'r+', 0)
         fcntl.ioctl(self.i2c, 0x0703, self.address)
-        
-        #self.i2c = I2C.get_i2c_device(self.address, busnum=busnum)
 
         self.debug = debug
         self.integration_time = integration_time
@@ -48,8 +46,8 @@ class TSL2561(object):
         if self.debug:
             print "autogain: %s" % self.autogain
             if not self.autogain:
-                print "use fixed gain: %x" %self.gain
-            print "integration time: %x" %self.integration_time
+                print "use fixed gain: %x" % self.gain
+            print "integration time: %x" % self.integration_time
         self._begin()
 
     def _begin(self):
@@ -59,11 +57,9 @@ class TSL2561(object):
         # Make sure we're actually connected
         self.i2c.write(chr(TSL2561_REGISTER_ID))
         x = ord(self.i2c.read(1))
-        #x = self.i2c.readU8(TSL2561_REGISTER_ID)
 
         if not x & 0x0A:
             raise Exception('TSL2561 not found!')
-        ##########
 
         # Set default integration time and gain
         self.set_integration_time(self.integration_time)
@@ -71,20 +67,20 @@ class TSL2561(object):
 
         # Note: by default, the device is in power down mode on bootup
         self.disable()
-        
+
     def readWord(self, reg):
         """Reads a word from the I2C device"""
         try:
             self.i2c.write(chr(reg))
             data = self.i2c.read(2)
-            wordval = (ord(data[1]) << 8) + ord(data[0]) # low byte comes first
+            wordval = (ord(data[1]) << 8) + ord(data[0])  # low byte comes first
             if (self.debug):
                 print("I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, wordval & 0xFFFF, reg))
             return wordval
         except IOError:
             print("Error accessing 0x%02X: Check your I2C address" % self.address)
             return -1
-            
+
     def enable(self):
         '''Enable the device by setting the control bit to 0x03'''
         self.i2c.write("%c%c" % (TSL2561_COMMAND_BIT | TSL2561_REGISTER_CONTROL, TSL2561_CONTROL_POWERON))
@@ -111,11 +107,9 @@ class TSL2561(object):
         TSL2561.delay(TSL2561_DELAY_INTTIME[self.integration_time])
 
         # Reads a two byte value from channel 0 (visible + infrared)
-        #broadband = self.i2c.readU16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW)
         broadband = self.readWord(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW)
 
         # Reads a two byte value from channel 1 (infrared)
-        #ir = self.i2c.readU16(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW)
         ir = self.readWord(TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW)
         # Turn the device off to save power
         self.disable()
@@ -128,7 +122,7 @@ class TSL2561(object):
         # Enable the device by setting the control bit to 0x03
         self.enable()
 
-        self.integration_time = integration_time     
+        self.integration_time = integration_time
         self.i2c.write("%c%c" % (TSL2561_COMMAND_BIT | TSL2561_REGISTER_TIMING, self.integration_time | self.gain))
 
         # Turn the device off to save power
@@ -303,26 +297,26 @@ class TSL2561(object):
         broadband, ir = self._get_luminosity()
 
         return self._calculate_lux(broadband, ir)
-        
+
     def setInterruptThresholdLow(self, low_byte, high_byte):
-        self.i2c.write('%c%c%c' % (0xA2,low_byte,high_byte))
-    
+        self.i2c.write('%c%c%c' % (0xA2, low_byte, high_byte))
+
     def setInterruptThresholdHigh(self, low_byte, high_byte):
-        self.i2c.write('%c%c%c' % (0xA4,low_byte, high_byte))
+        self.i2c.write('%c%c%c' % (0xA4, low_byte, high_byte))
         print("threshold high written")
-        
+
     def disableInterrupt(self):
         self.i2c.write('%c%c' % (0xC6, 0x00))
         print "interrupts disabled"
-        
+
     def clearInterrupt(self):
         self.i2c.write(chr(0xC3))
-        
+
     def enableLevelInterrupt(self, persistence=0):
         duration_ot_of_range = persistence & 0xFF
         self.i2c.write('%c%c' % (0x86, 0x10 | duration_ot_of_range))
         print "Level interrupt enabled"
-        
+
 if __name__ == "__main__":
     tsl = TSL2561(debug=True, autogain=False, gain=TSL2561_GAIN_1X, integration_time=TSL2561_INTEGRATIONTIME_13MS)
     print tsl.lux()
