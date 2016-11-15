@@ -14,7 +14,7 @@ https://github.com/sim0nx/tsl2561
 from __future__ import absolute_import
 import time
 import fcntl
-from constants import *  # pylint: disable=unused-wildcard-import
+from constants import *
 
 __author__ = 'Andy Paul <nurazur@gmail.com>'
 __credits__ = ['K.Townsend (Adafruit Industries)']
@@ -324,5 +324,5 @@ class TSL2561(object):
         print "Level interrupt enabled"
         
 if __name__ == "__main__":
-    tsl = TSL2561(debug=True, autogain=False, gain=0, integration_time=0)
+    tsl = TSL2561(debug=True, autogain=False, gain=TSL2561_GAIN_1X, integration_time=TSL2561_INTEGRATIONTIME_13MS)
     print tsl.lux()
