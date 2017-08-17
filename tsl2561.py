@@ -11,7 +11,7 @@ Code ported from Python library found here
 https://github.com/sim0nx/tsl2561
 '''
 
-from __future__ import absolute_import
+#from __future__ import absolute_import
 import time
 import fcntl
 from constants import *
