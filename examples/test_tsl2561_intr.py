@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from ada_tsl2561_AH import *
+from tsl2561 import TSL2561
 import RPi.GPIO as GPIO
 import sys
 import os
@@ -38,6 +38,7 @@ while True:
             ir  = tsl.readWord(0x8E)
             if ir is not 0:
                 tsl.clearInterrupt()
+                print "interrupt cleared"
 
     except KeyboardInterrupt:
         sys.exit(0)
